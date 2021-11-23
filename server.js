@@ -12,20 +12,55 @@ const connection = mysql.createConnection({
   port: process.env.RDS_PORT
 });
 
-connection.connect(function(err) {
-  if (err) {
-    console.error('Database connection failed: ' + err.stack);
-    return;
-  }
-  console.log('Connected to Database!');
-})
+// function getEvents() {
+//   connection.connect(function(err) {
+//     if (err) throw err;
+//     console.log('Connected!');
+//     var sql = "USE Upcoming_Events"
+//     connection.query(sql, function(err, result) {
+//       if (err) throw err;
+//     });
+//     var sql = "SELECT * FROM Events"
+//     connection.query(sql, function(err, result) {
+//       if (err) throw err;
+//       console.log(result);
+//       return(result);
+//     });
+//   connection.end();
+//   })
+// }
 
-connection.end();
 
 app.use(cors());
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
-app.get('/events', (req, res) => {
-  res.send({express: 'YOUR EXPRESS BACKEND IS CONNECTED TO REACT'})
+app.get('/events', function (req, res) {
+
+  const connection = mysql.createConnection({
+    host: process.env.RDS_HOSTNAME,
+    user: process.env.RDS_USERNAME,
+    password: process.env.RDS_PASSWORD,
+    port: process.env.RDS_PORT
+  });
+
+  connection.connect(function(err) {
+    if (err) throw err;
+    console.log('Connected!');
+
+    var sql = "USE Upcoming_Events"
+    connection.query(sql, function(err, result) {
+      if (err) throw err;
+    });
+
+    var sql = "SELECT * FROM Events"
+    connection.query(sql, function(err, result) {
+      if (err) throw err;
+      console.log(result);
+      res.send(result);
+    });
+
+    connection.end();
+  })
+
 });
